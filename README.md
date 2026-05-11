@@ -11,5 +11,5 @@ Throughout this term, we will be working on a tool that processes MTN MoMo SMS t
 
 ## Links
 
-- [Architecture Diagram](https://miro.com/app/board/uXjVHX2Nt5w=/?share_link_id=716970547823)
 - [Scrum Board](https://github.com/users/imenarh/projects/3)
+- [Architecture Diagram](https://miro.com/app/board/uXjVHX2Nt5w=/?share_link_id=716970547823)
