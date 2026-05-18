@@ -1,0 +1,7 @@
+{
+  "transaction_category": {
+    "id": 3,
+    "name": "P2P Transfer",
+    "description": "Person to person money transfer"
+  }
+}
