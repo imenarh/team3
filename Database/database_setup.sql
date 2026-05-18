@@ -53,3 +53,42 @@ CREATE TABLE system_logs (
 CREATE INDEX idx_user_phone ON user(phone_number);
 CREATE INDEX idx_transaction_ref ON transaction(reference_id);
 CREATE INDEX idx_transaction_date ON transaction(timestamp);
+
+INSERT INTO transaction_category (name, description) VALUES 
+('P2P Transfer', 'Person to person money transfer'),
+('Airtime Purchase', 'Buying mobile airtime'),
+('Merchant Payment', 'Payment for goods or services using MoMo Pay'),
+('Cash In', 'Depositing money into MoMo account at an agent'),
+('Cash Out', 'Withdrawing money from MoMo account at an agent');
+
+
+INSERT INTO user (name, phone_number, account_type) VALUES 
+('Alice ISHIMWE', '0781234567', 'STANDARD'),
+('Bob KABALI', '0787654321', 'STANDARD'),
+('Kigali Supermarket', '0789998888', 'MERCHANT'),
+('MoMo Agent 001', '0780001111', 'AGENT'),
+('Charlie HABYARIMANA', '0785554444', 'STANDARD');
+
+
+INSERT INTO transaction (reference_id, category_id, amount, fee, status, raw_sms_text, timestamp) VALUES 
+('TXN10001', 1, 5000.00, 100.00, 'SUCCESS', 'You have transferred 5000 RWF to Bob KABALI...', '2023-10-25 08:30:00'),
+('TXN10002', 3, 12500.00, 0.00, 'SUCCESS', 'Payment of 12500 RWF to Kigali Supermarket successful...', '2023-10-25 09:15:00'),
+('TXN10003', 2, 1000.00, 0.00, 'SUCCESS', 'You have bought 1000 RWF airtime...', '2023-10-25 10:00:00'),
+('TXN10004', 4, 50000.00, 0.00, 'SUCCESS', 'Cash in of 50000 RWF from Agent 001...', '2023-10-25 11:20:00'),
+('TXN10005', 1, 15000.00, 300.00, 'FAILED', 'Transfer failed due to insufficient funds.', '2023-10-25 12:05:00');
+
+
+INSERT INTO user_transactions (user_id, transaction_id, role, balance_after) VALUES 
+(1, 1, 'SENDER', 14900.00),  -- Alice sent TXN1
+(2, 1, 'RECEIVER', 25000.00), -- Bob received TXN1
+(1, 2, 'SENDER', 2400.00),   -- Alice paid Merchant TXN2
+(3, 2, 'RECEIVER', 150000.00),-- Merchant received TXN2
+(5, 4, 'RECEIVER', 52000.00); -- Charlie received Cash In TXN4
+
+
+INSERT INTO system_logs (transaction_id, message, source, log_type) VALUES 
+(1, 'Successfully parsed P2P transfer SMS', 'ETL_Parser', 'INFO'),
+(2, 'Successfully parsed Merchant Payment SMS', 'ETL_Parser', 'INFO'),
+(NULL, 'Database connection timeout recovered', 'Database_Manager', 'WARNING'),
+(4, 'Cash In SMS normalized successfully', 'ETL_Cleaner', 'INFO'),
+(5, 'Transaction marked as failed: insufficient funds text detected', 'ETL_Categorizer', 'ERROR');
