@@ -54,7 +54,7 @@
       "amount": 5000,
       "fee": 100,
       "status": "SUCCESS",
-      "raw_sms_text": "You have transferred 5000 RWF to Benito KABALI (+250788123456). Your new balance is 25,000 RWF. TxnID: TXN-20240320-00482.",
+      "raw_sms_text": "You have transferred 5000 RWF to Benito KABALI (+250788123456). Your new balance is 14,900   RWF. TxnID: TXN-20240320-00482.",
       "timestamp": "2024-03-20T14:22:10Z",
 
       "transaction_category": {

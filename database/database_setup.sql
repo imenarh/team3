@@ -63,7 +63,6 @@ INSERT INTO transaction_category (name, description) VALUES
 
 
 
-
 INSERT INTO user (name, phone_number, account_type, created_at) VALUES 
 ('Orla ISHIMWE', '0781234567', 'STANDARD', '2025-03-12 08:22:00'),
 ('Benito KABALI', '0787654321', 'STANDARD', '2025-07-19 14:05:00'),
