@@ -1,0 +1,10 @@
+{
+  "system_log": {
+    "id": 1,
+    "transaction_id": 1,
+    "message": "Successfully parsed P2P transfer SMS",
+    "source": "ETL Parser",
+    "log_type": "info",
+    "timestamp": "2024-03-20T14:22:11Z"
+  }
+}
