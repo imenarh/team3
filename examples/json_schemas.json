@@ -1,0 +1,185 @@
+{
+  "description": "Consolidated JSON schemas for the MoMo SMS data processing system. Contains individual entity representations, a complete nested transaction example, and the SQL-to-JSON mapping documentation.",
+
+  "entity_schemas": {
+    "user": {
+      "_comment": "Maps to 'user' table. Each user represents a MoMo account holder (STANDARD, MERCHANT, or AGENT).",
+      "id": 1,
+      "name": "Orla ISHIMWE",
+      "phone_number": "+250788123456",
+      "account_type": "STANDARD",
+      "created_at": "2024-01-15T08:30:00Z"
+    },
+    "transaction": {
+      "_comment": "Maps to 'transaction' table. Core event record with reference_id from SMS.",
+      "id": 1,
+      "reference_id": "TXN-20240320-00482",
+      "category_id": 3,
+      "amount": 5000,
+      "fee": 100,
+      "status": "SUCCESS",
+      "raw_sms_text": "You have transferred 5,000 RWF to Benito KABALI (+250788123456). Your new balance is 14,900 RWF. TxnID: TXN-20240320-00482.",
+      "timestamp": "2024-03-20T14:22:10Z"
+    },
+    "transaction_category": {
+      "_comment": "Maps to 'transaction_category' table. Lookup for transaction types.",
+      "id": 3,
+      "name": "P2P Transfer",
+      "description": "Person to person money transfer"
+    },
+    "user_transaction": {
+      "_comment": "Maps to 'user_transactions' junction table. Links users to transactions with a role (SENDER/RECEIVER).",
+      "id": 2,
+      "user_id": 1,
+      "transaction_id": 1,
+      "role": "SENDER",
+      "balance_after": 14900
+    },
+    "system_log": {
+      "_comment": "Maps to 'system_logs' table. Application activity log, optionally linked to a transaction.",
+      "id": 1,
+      "transaction_id": 1,
+      "message": "Successfully parsed P2P transfer SMS",
+      "source": "ETL Parser",
+      "log_type": "INFO",
+      "timestamp": "2024-03-20T14:22:11Z"
+    }
+  },
+
+  "complete_transaction": {
+    "_comment": "Complete transaction API response — all related entities nested for a single API call. Maps to: Transaction JOIN user_transactions JOIN user JOIN transaction_category LEFT JOIN system_logs.",
+    "transaction": {
+      "id": 1,
+      "reference_id": "TXN-20240320-00482",
+      "amount": 5000,
+      "fee": 100,
+      "status": "SUCCESS",
+      "raw_sms_text": "You have transferred 5000 RWF to Benito KABALI (+250788123456). Your new balance is 25,000 RWF. TxnID: TXN-20240320-00482.",
+      "timestamp": "2024-03-20T14:22:10Z",
+
+      "transaction_category": {
+        "id": 3,
+        "name": "P2P Transfer",
+        "description": "Person to person money transfer"
+      },
+
+      "participants": [
+        {
+          "user_transaction_id": 1,
+          "role": "RECEIVER",
+          "balance_after": 25000,
+          "user": {
+            "id": 2,
+            "name": "Benito KABALI",
+            "phone_number": "+250788654321",
+            "account_type": "STANDARD",
+            "created_at": "2023-11-05T10:00:00Z"
+          }
+        },
+        {
+          "user_transaction_id": 2,
+          "role": "SENDER",
+          "balance_after": 14900,
+          "user": {
+            "id": 1,
+            "name": "Orla ISHIMWE",
+            "phone_number": "+250788123456",
+            "account_type": "STANDARD",
+            "created_at": "2024-01-15T08:30:00Z"
+          }
+        }
+      ],
+
+      "system_logs": [
+        {
+          "id": 1,
+          "message": "Successfully parsed P2P transfer SMS.",
+          "source": "ETL_Parser",
+          "log_type": "INFO",
+          "timestamp": "2024-03-20T14:22:11Z"
+        },
+        {
+          "id": 2,
+          "message": "Transaction categorized as P2P Transfer",
+          "source": "ETL_Categorizer",
+          "log_type": "INFO",
+          "timestamp": "2024-03-20T14:22:11Z"
+        }
+      ]
+    }
+  },
+
+  "sql_to_json_mapping": {
+    "description": "Documents how each SQL table column maps to its JSON key counterpart, including type conversions and nesting strategies used in API responses.",
+    "general_conventions": {
+      "datetime_format": "ISO 8601 (e.g. 2024-03-20T14:22:10Z) — DATETIME columns always serialized to UTC ISO strings",
+      "foreign_keys": "FK columns (e.g. category_id, user_id) are replaced by their resolved nested objects in API responses; the raw integer FK is omitted",
+      "enums": "ENUM columns serialize as uppercase strings matching the SQL ENUM member exactly",
+      "omitted_fields": "Redundant FK integers that are implicit from nesting context (e.g. transaction_id inside system_logs) are omitted to keep responses clean"
+    },
+    "tables": [
+      {
+        "sql_table": "user",
+        "json_key": "user",
+        "columns": [
+          { "sql_column": "ID",           "sql_type": "INTEGER",  "json_key": "id",           "json_type": "number"  },
+          { "sql_column": "name",         "sql_type": "VARCHAR",  "json_key": "name",         "json_type": "string"  },
+          { "sql_column": "phone_number", "sql_type": "VARCHAR",  "json_key": "phone_number", "json_type": "string"  },
+          { "sql_column": "account_type", "sql_type": "ENUM",     "json_key": "account_type", "json_type": "string"  },
+          { "sql_column": "created_at",   "sql_type": "DATETIME", "json_key": "created_at",   "json_type": "string (ISO 8601)" }
+        ],
+        "nesting_note": "Nested inside participant objects within the 'participants' array of a transaction response."
+      },
+      {
+        "sql_table": "transaction",
+        "json_key": "transaction",
+        "columns": [
+          { "sql_column": "ID",           "sql_type": "INTEGER",  "json_key": "id",           "json_type": "number"  },
+          { "sql_column": "reference_id", "sql_type": "VARCHAR",  "json_key": "reference_id", "json_type": "string"  },
+          { "sql_column": "category_id",  "sql_type": "INTEGER",  "json_key": "category",     "json_type": "object (expanded FK)", "note": "FK expanded into nested category object" },
+          { "sql_column": "amount",       "sql_type": "DECIMAL",  "json_key": "amount",       "json_type": "number"  },
+          { "sql_column": "fee",          "sql_type": "DECIMAL",  "json_key": "fee",          "json_type": "number"  },
+          { "sql_column": "status",       "sql_type": "ENUM",     "json_key": "status",       "json_type": "string"  },
+          { "sql_column": "raw_sms_text", "sql_type": "VARCHAR",  "json_key": "raw_sms_text", "json_type": "string"  },
+          { "sql_column": "timestamp",    "sql_type": "DATETIME", "json_key": "timestamp",    "json_type": "string (ISO 8601)" }
+        ],
+        "nesting_note": "Root object in the complete_transaction.json response. FKs (category_id) are resolved to nested objects."
+      },
+      {
+        "sql_table": "user_transactions",
+        "json_key": "participants[]",
+        "columns": [
+          { "sql_column": "id",             "sql_type": "INTEGER", "json_key": "user_transaction_id", "json_type": "number" },
+          { "sql_column": "user_id",        "sql_type": "INTEGER", "json_key": "user",               "json_type": "object (expanded FK)", "note": "FK expanded into nested user object" },
+          { "sql_column": "transaction_id", "sql_type": "INTEGER", "json_key": null,                  "note": "Omitted — implicit from context (parent transaction)" },
+          { "sql_column": "role",           "sql_type": "ENUM",    "json_key": "role",               "json_type": "string" },
+          { "sql_column": "balance_after",  "sql_type": "DECIMAL", "json_key": "balance_after",      "json_type": "number" }
+        ],
+        "nesting_note": "Resolved M:N junction. Each row becomes an element in the 'participants' array, with user FK expanded inline."
+      },
+      {
+        "sql_table": "transaction_category",
+        "json_key": "category",
+        "columns": [
+          { "sql_column": "ID",          "sql_type": "INTEGER", "json_key": "id",          "json_type": "number" },
+          { "sql_column": "name",        "sql_type": "VARCHAR", "json_key": "name",        "json_type": "string" },
+          { "sql_column": "description", "sql_type": "VARCHAR", "json_key": "description", "json_type": "string" }
+        ],
+        "nesting_note": "Nested directly inside transaction object as 'category'. Never returned as a top-level array in the complete response."
+      },
+      {
+        "sql_table": "system_logs",
+        "json_key": "system_logs[]",
+        "columns": [
+          { "sql_column": "ID",             "sql_type": "INTEGER",  "json_key": "id",         "json_type": "number" },
+          { "sql_column": "transaction_id", "sql_type": "INTEGER",  "json_key": null,          "note": "Omitted — implicit from parent transaction context" },
+          { "sql_column": "message",        "sql_type": "VARCHAR",  "json_key": "message",    "json_type": "string" },
+          { "sql_column": "source",         "sql_type": "VARCHAR",  "json_key": "source",     "json_type": "string" },
+          { "sql_column": "log_type",       "sql_type": "ENUM",     "json_key": "log_type",   "json_type": "string" },
+          { "sql_column": "timestamp",      "sql_type": "DATETIME", "json_key": "timestamp",  "json_type": "string (ISO 8601)" }
+        ],
+        "nesting_note": "Appended as an array under the transaction. Each log row with matching transaction_id becomes one array element."
+      }
+    ]
+  }
+}
