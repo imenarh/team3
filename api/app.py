@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler
 import json
 import re
 
-REQUIRED_FIELDS = ["momo_tx_id", "sender_address", "timestamp_readable", "raw_sms_text"]
+REQUIRED_FIELDS = ["reference_id", "amount", "fee", "status", "category", "timestamp", "raw_sms_text"]
 
 
 class MomoDataAPIHandler(BaseHTTPRequestHandler):
@@ -90,6 +90,6 @@ class MomoDataAPIHandler(BaseHTTPRequestHandler):
             if txn["id"] == txn_id:
                 self.transactions.pop(i)
                 self.save()
-                return self._send_json({"message": "Deleted"})
+                return self._send_json({"message": f"Transaction {txn_id} deleted"})
 
         self._send_json({"error": "Transaction not found"}, 404)
