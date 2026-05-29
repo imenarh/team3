@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler
 import json
 import re
+from api.auth import require_auth
 
 REQUIRED_FIELDS = ["reference_id", "amount", "fee", "status", "category", "timestamp", "raw_sms_text"]
 
@@ -29,6 +30,9 @@ class MomoDataAPIHandler(BaseHTTPRequestHandler):
 
     #GET endpoints
     def do_GET(self):
+        if not require_auth(self):
+            return
+
         if self.path == "/transactions":
             return self._send_json(self.transactions)
 
@@ -45,6 +49,9 @@ class MomoDataAPIHandler(BaseHTTPRequestHandler):
 
     #POST endpoints
     def do_POST(self):
+        if not require_auth(self):
+            return
+          
         body = self._read_body()
         err = self._validate(body)
         if err:
@@ -59,6 +66,9 @@ class MomoDataAPIHandler(BaseHTTPRequestHandler):
 
     #PUT endpoints
     def do_PUT(self):
+        if not require_auth(self):
+            return
+        
         m = self._match(r"^/transactions/(\d+)$")
         if not m:
             return self._send_json({"error": "Not found"}, 404)
@@ -81,6 +91,9 @@ class MomoDataAPIHandler(BaseHTTPRequestHandler):
 
     #DELETE endpoints
     def do_DELETE(self):
+        if not require_auth(self):
+            return
+
         m = self._match(r"^/transactions/(\d+)$")
         if not m:
             return self._send_json({"error": "Not found"}, 404)
