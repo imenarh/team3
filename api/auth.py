@@ -3,7 +3,6 @@ import base64
 # Credentials for Basic Authentication 
 VALID_USERS = {
     "admin": "momo2026",
-    "viewer": "readonly123"
 }
 
 def check_basic_auth(handler):

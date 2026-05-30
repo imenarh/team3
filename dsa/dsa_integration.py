@@ -163,7 +163,7 @@ def run_dsa_benchmark(transactions_list):
     print("="*60 + "\n")
 
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     BASE_DIR = Path(__file__).resolve().parent.parent
     
     # NOTE: Ensure your downloaded file in data/raw/ matches this name (e.g. momo.xml or modified_sms_v2.xml)
