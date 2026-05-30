@@ -24,6 +24,30 @@ The Application database schema has these entities:
 - **system_logs:** Application activity logs (INFO, WARNING, ERROR), which can, optionally, be tied to a transaction.
 
 
+## Setup Instructions
+
+### Prerequisites
+- Python 3.8+
+
+### 1. Parse the Data
+```bash
+python -m etl.parse_xml
+```
+Parses `data/raw/momo.xml` into JSON at `data/processed/dashboard.json`. **This must be run first** before starting the API.
+
+### 2. Run the API Server
+```bash
+python -m api
+```
+The server starts at `http://localhost:8080`. All endpoints require Basic Authentication (`admin` / `momo2026`).
+
+### DSA Benchmark
+```bash
+python -m dsa.dsa_integration
+```
+Runs the linear search vs dictionary lookup comparison and prints the results.
+
+
 ## Important Links
 
 - [Scrum Board](https://github.com/users/imenarh/projects/3)
